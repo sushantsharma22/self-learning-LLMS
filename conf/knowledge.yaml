@@ -1,0 +1,21 @@
+defaults:
+  - base          # inherit everything from base.yaml
+
+# ------------ task identifier --------------
+task: knowledge    # SQuAD “no-passage” factual QA
+
+# -------------- dataset slice --------------
+dataset:
+  name: squad            # HF dataset name
+  train_slice: train[:1%]  # use 1 % for speed (≈875 Qs)
+  eval_slice: validation[:200]  # held-out eval
+  ctx_per_round: 20      # N contexts sampled each SEAL round
+
+# -------- LoRA rank for knowledge run -------
+lora:
+  r: 64
+  alpha: 128
+
+# -------- self-edit sampling (paper: M=5) ---
+self_edits:
+  samples_per_ctx: 2

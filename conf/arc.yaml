@@ -1,0 +1,20 @@
+defaults:
+  - base
+
+task: arc            # abstract reasoning, multiple-choice
+
+dataset:
+  name: ai2_arc
+  subset: ARC-Challenge
+  train_slice: train         # full train split
+  eval_slice: validation
+  ctx_per_round: 25          # fewer contexts (harder task)
+
+# LoRA is heavier for reasoning as in paper appendix
+lora:
+  r: 128
+  alpha: 256
+
+# Paper uses M = 15 self-edits for ARC
+self_edits:
+  samples_per_ctx: 15
