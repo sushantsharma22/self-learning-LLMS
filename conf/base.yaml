@@ -5,7 +5,7 @@ defaults:
 # ------------------- model settings --------------------
 model:
   name: Qwen/Qwen1.5-7B   # fits across 4×A16 in fp16
-  load_4bit: false        # set true for 4-bit quant
+  load_4bit: true        # set true for 4-bit quant
 
 # ------------------- LoRA settings ---------------------
 lora:

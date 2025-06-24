@@ -1,21 +1,42 @@
 defaults:
+  - _self_
   - base          # inherit everything from base.yaml
 
 # ------------ task identifier --------------
-task: knowledge    # SQuAD “no-passage” factual QA
+task: knowledge    # factual QA task (SQuAD)
 
 # -------------- dataset slice --------------
 dataset:
-  name: squad            # HF dataset name
-  train_slice: train[:1%]  # use 1 % for speed (≈875 Qs)
-  eval_slice: validation[:200]  # held-out eval
-  ctx_per_round: 20      # N contexts sampled each SEAL round
+  name: squad
+  train_slice: train[:2%]         # ~875 examples for faster iteration
+  eval_slice: validation[:200]    # small eval set
+  ctx_per_round: 5                # how many questions per round
 
-# -------- LoRA rank for knowledge run -------
+# -------- LoRA settings (lightweight adapters) -------
 lora:
   r: 64
   alpha: 128
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - v_proj
+    - up_proj
+    - gate_proj
+    - down_proj
 
-# -------- self-edit sampling (paper: M=5) ---
+# -------- self-edit sampling --------
 self_edits:
-  samples_per_ctx: 2
+  samples_per_ctx: 3             # edits per input
+
+# -------- RL self-improvement loop --------
+rl:
+  max_rounds: 4                  # more rounds = deeper self-learning
+  reward_threshold: 0.01         # allow smaller gains (sensitive learning)
+
+# -------- model --------
+model:
+  name: Qwen/Qwen1.5-7B
+  load_4bit: true
+
+# -------- deepspeed (for GPU efficiency) --------
+deepspeed_config: ds_z3_A16.json

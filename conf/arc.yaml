@@ -1,5 +1,6 @@
 defaults:
   - base
+  - _self_
 
 task: arc            # abstract reasoning, multiple-choice
 

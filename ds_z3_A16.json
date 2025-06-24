@@ -5,10 +5,17 @@
   "zero_optimization": {
     "stage": 3,
     "offload_param": {
-      "device": "cpu"
+      "device": "cpu",
+      "pin_memory": true
+    },
+    "offload_optimizer": {
+      "device": "cpu",
+      "pin_memory": true
     },
     "overlap_comm": true,
-    "contiguous_gradients": true
+    "contiguous_gradients": true,
+    "reduce_bucket_size": 50000000,
+    "allgather_bucket_size": 50000000
   },
 
   "fp16": {
