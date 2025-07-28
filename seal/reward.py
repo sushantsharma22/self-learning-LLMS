@@ -1,17 +1,12 @@
 """
 reward.py
 =========
-Tiny helper: decide whether a new metric beats the threshold.
+Simple “should we accept the candidate?” helper.
 """
 
-
-def should_accept(
-    old_metric: float, new_metric: float, threshold: float
-) -> bool:
+def should_accept(old_metric: float, new_metric: float, threshold: float) -> bool:
     """
-    Return True if `new_metric` improves on `old_metric` by at least
-    `threshold`.
-
-    In the paper they use a *binary reward*: 1 if improved, else 0.
+    Accept if the improvement is ≥ `threshold`.
+    Guarantees negative improvements never pass through.
     """
-    return (new_metric - old_metric) >= threshold
+    return max(new_metric - old_metric, 0.0) >= threshold

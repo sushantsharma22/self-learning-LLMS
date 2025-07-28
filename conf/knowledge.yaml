@@ -1,21 +1,43 @@
 defaults:
+  - base # inherit global defaults
   - _self_
-  - base          # inherit everything from base.yaml
 
-# ------------ task identifier --------------
-task: knowledge    # factual QA task (SQuAD)
+# ------------------------------------------------------------------
+# Task identifier
+# ------------------------------------------------------------------
+task: knowledge # factual QA (SQuAD‑style)
 
-# -------------- dataset slice --------------
+# ------------------------------------------------------------------
+# Dataset slice - INCREASED for multi-GPU
+# ------------------------------------------------------------------
 dataset:
   name: squad
-  train_slice: train[:2%]         # ~875 examples for faster iteration
-  eval_slice: validation[:200]    # small eval set
-  ctx_per_round: 5                # how many questions per round
+  train_slice: train[:3000]
+  eval_slice: validation[:2000]
+  ctx_per_round: 3 # INCREASED from 2 (more memory available)
 
-# -------- LoRA settings (lightweight adapters) -------
+# ------------------------------------------------------------------
+# Self‑edit sampling - INCREASED for multi-GPU
+# ------------------------------------------------------------------
+self_edits:
+  samples_per_ctx: 8 # INCREASED from 15 (distributed processing)
+
+# ------------------------------------------------------------------
+# RL / restem thresholds
+# ------------------------------------------------------------------
+rl:
+  max_rounds: 8 # two extra SEAL rounds
+  sim_threshold: 0.01 # require +0.10 cosine similarity
+  f1_threshold: 0.00 # token‑level F1 must improve a little
+  reward_threshold: 0.001 # admit small positive rewards
+  alpha: 0.4 # blend Sim and F1 as before
+
+# ------------------------------------------------------------------
+# LoRA fine‑tuning settings - OPTIMIZED for multi-GPU
+# ------------------------------------------------------------------
 lora:
-  r: 64
-  alpha: 128
+  r: 4 # Keep current value
+  alpha: 8 # Keep current value
   dropout: 0.05
   target_modules:
     - q_proj
@@ -23,20 +45,17 @@ lora:
     - up_proj
     - gate_proj
     - down_proj
+  learning_rate: 2e-4 # slightly stronger updates per win
+  num_train_epochs: 2 # INCREASED from 4 (more memory available)
 
-# -------- self-edit sampling --------
-self_edits:
-  samples_per_ctx: 3             # edits per input
-
-# -------- RL self-improvement loop --------
-rl:
-  max_rounds: 4                  # more rounds = deeper self-learning
-  reward_threshold: 0.01         # allow smaller gains (sensitive learning)
-
-# -------- model --------
+# ------------------------------------------------------------------
+# Base model & quantisation
+# ------------------------------------------------------------------
 model:
-  name: Qwen/Qwen1.5-7B
-  load_4bit: true
+  name: meta-llama/Meta-Llama-3-8B-Instruct
+  load_4bit: true # keep VRAM usage low
 
-# -------- deepspeed (for GPU efficiency) --------
-deepspeed_config: ds_z3_A16.json
+# ------------------------------------------------------------------
+# DeepSpeed (disabled for DDP)
+# ------------------------------------------------------------------
+#deepspeed_config: null # Disabled for DDP training

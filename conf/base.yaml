@@ -4,15 +4,15 @@ defaults:
 
 # ------------------- model settings --------------------
 model:
-  name: Qwen/Qwen1.5-7B   # fits across 4×A16 in fp16
-  load_4bit: true        # set true for 4-bit quant
+  name: meta-llama/Meta-Llama-3-8B-Instruct
+  load_4bit: true
 
 # ------------------- LoRA settings ---------------------
 lora:
-  r: 64          # rank
+  r: 64
   alpha: 128
   dropout: 0.05
-  target_modules:   # projected layers to adapt
+  target_modules:
     - q_proj
     - v_proj
     - up_proj
@@ -23,10 +23,13 @@ lora:
 self_edits:
   samples_per_ctx: 5   # paper uses M = 5 (knowledge) or 15 (ARC)
 
-# -------------- reinforcement loop ---------------------
+# -------------- reinforcement loop (SEAL) -------------
 rl:
-  max_rounds: 2          # R in paper
-  reward_threshold: 0.05 # Δmetric needed to accept
+  max_rounds:     4      # deeper self-learning
+  reward_threshold: 0.02  # combined sim+F1 reward needed to accept
+  sim_threshold:    0.02  # minimum semantic bump per edit
+  f1_threshold:     0.0   # no negative F1 change allowed
+  alpha:            0.7   # weight for sim vs F1 in reward
 
 # --------------- DeepSpeed config path -----------------
 deepspeed_config: ds_z3_A16.json
